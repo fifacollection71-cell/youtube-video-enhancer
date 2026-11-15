@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>YouTube Video Enhancer</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      width: 320px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #18181b;
+      color: #f4f4f5;
+      padding: 16px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #27272a;
+    }
+
+    .title-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff4500, #ffb400);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 10px rgba(255, 69, 0, 0.4);
+      flex-shrink: 0;
+    }
+
+    .logo-icon span {
+      width: 8px;
+      height: 8px;
+      background: #ffffff;
+      border-radius: 50%;
+    }
+
+    .title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #fafafa;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-pill {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 2px 7px;
+      border-radius: 10px;
+    }
+
+    .status-active {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .status-inactive {
+      background: rgba(161, 161, 170, 0.12);
+      color: #a1a1aa;
+      border: 1px solid rgba(161, 161, 170, 0.25);
+    }
+
+    /* Switch toggle */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 22px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider-toggle {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #3f3f46;
+      transition: .25s;
+      border-radius: 22px;
+    }
+
+    .slider-toggle:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .25s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider-toggle {
+      background-color: #ff5722;
+    }
+
+    input:checked + .slider-toggle:before {
+      transform: translateX(18px);
+    }
+
+    /* Controls */
+    .control-group {
+      margin-bottom: 14px;
+    }
+
+    .control-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 500;
+      color: #a1a1aa;
+      margin-bottom: 6px;
+    }
+
+    .val-badge {
+      color: #38bdf8;
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+
+    .range-slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #27272a;
+      outline: none;
+    }
+
+    .range-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #ff5722;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(255, 87, 34, 0.5);
+      transition: transform 0.1s;
+    }
+
+    .range-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    /* Preset buttons */
+    .presets-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    .presets-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .btn-preset {
+      background: #27272a;
+      border: 1px solid #3f3f46;
+      color: #e4e4e7;
+      padding: 7px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .btn-preset:hover {
+      background: #3f3f46;
+      border-color: #52525b;
+      color: #ffffff;
+    }
+
+    .btn-preset.active {
+      background: rgba(255, 87, 34, 0.2);
+      border-color: #ff5722;
+      color: #ff8a65;
+    }
+
+    /* Actions */
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #27272a;
+    }
+
+    .btn-reset {
+      background: transparent;
+      border: none;
+      color: #a1a1aa;
+      font-size: 12px;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 4px 6px;
+    }
+
+    .btn-reset:hover {
+      color: #ffffff;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: #71717a;
+    }
+
+    /* Inactive State Card */
+    .inactive-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 20px 14px;
+      background: #202024;
+      border-radius: 8px;
+      border: 1px solid #2e2e33;
+    }
+
+    .inactive-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #2a2a32;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      color: #a1a1aa;
+    }
+
+    .inactive-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #f4f4f5;
+      margin-bottom: 6px;
+    }
+
+    .inactive-desc {
+      font-size: 12px;
+      line-height: 1.45;
+      color: #a1a1aa;
+      margin-bottom: 16px;
+    }
+
+    .btn-open-yt {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #ff0000;
+      color: #ffffff;
+      border: none;
+      padding: 9px 18px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      text-decoration: none;
+      width: 100%;
+    }
+
+    .btn-open-yt:hover {
+      background: #cc0000;
+    }
+
+    .btn-open-yt:active {
+      transform: scale(0.98);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title-group">
+      <div class="logo-icon"><span></span></div>
+      <div class="title">YouTube Enhancer</div>
+    </div>
+    <div class="header-right">
+      <span class="status-pill status-inactive" id="status-pill">Checking...</span>
+      <div id="header-toggle-container" style="display: none;">
+        <label class="switch">
+          <input type="checkbox" id="toggle-enable" checked>
+          <span class="slider-toggle"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active View (Shown ONLY when on YouTube) -->
+  <div id="view-active" style="display: none;">
+    <div class="control-group">
+      <div class="control-header">
+        <span>Brightness</span>
+        <span class="val-badge" id="val-brightness">125%</span>
+      </div>
+      <input type="range" class="range-slider" id="slider-brightness" min="50" max="250" value="125">
+    </div>
+
+    <div class="control-group">
+      <div class="control-header">
+        <span>Contrast</span>
+        <span class="val-badge" id="val-contrast">115%</span>
+      </div>
+      <input type="range" class="range-slider" id="slider-contrast" min="50" max="200" value="115">
+    </div>
+
+    <div class="control-group">
+      <div class="control-header">
+        <span>Vibrance / Saturation</span>
+        <span class="val-badge" id="val-saturation">135%</span>
+      </div>
+      <input type="range" class="range-slider" id="slider-saturation" min="50" max="250" value="135">
+    </div>
+
+    <div class="presets-label">Quick Presets</div>
+    <div class="presets-grid">
+      <button class="btn-preset active" id="preset-vibrant">✨ Vibrant & Bright</button>
+      <button class="btn-preset" id="preset-darkboost">🌙 Dark Boost</button>
+      <button class="btn-preset" id="preset-rich">🎬 Rich & Punchy</button>
+      <button class="btn-preset" id="preset-standard">📺 Standard (100%)</button>
+    </div>
+
+    <div class="actions">
+      <span class="hint">Active on YouTube</span>
+      <button class="btn-reset" id="btn-reset">Reset to Default</button>
+    </div>
+  </div>
+
+  <!-- Inactive View (Shown on all non-YouTube pages) -->
+  <div id="view-inactive" class="inactive-card" style="display: none;">
+    <div class="inactive-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+      </svg>
+    </div>
+    <div class="inactive-title">Only Active on YouTube</div>
+    <p class="inactive-desc">
+      This extension is strictly restricted to YouTube. It automatically activates when you view YouTube and remains dormant everywhere else.
+    </p>
+    <button id="btn-open-youtube" class="btn-open-yt">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+      </svg>
+      Open YouTube
+    </button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
